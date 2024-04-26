@@ -3,17 +3,17 @@
 import logging
 
 from homeassistant.components.number import (
-    NumberEntity,
-    DEFAULT_MIN_VALUE,
     DEFAULT_MAX_VALUE,
+    DEFAULT_MIN_VALUE,
     DEFAULT_STEP,
+    NumberEntity,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import PERCENTAGE
 from homeassistant.helpers.typing import HomeAssistantType
 
 from . import PoolEntity
 from .const import DOMAIN
-from homeassistant.const import PERCENTAGE
 from .pyintellicenter import (
     BODY_ATTR,
     BODY_TYPE,
@@ -38,15 +38,15 @@ async def async_setup_entry(
 
     numbers = []
 
-    object: PoolObject
-    for object in controller.model.objectList:
+    obj: PoolObject
+    for obj in controller.model.objectList:
         if (
-            object.objtype == CHEM_TYPE
-            and object.subtype == "ICHLOR"
-            and PRIM_ATTR in object.attributes
+            obj.objtype == CHEM_TYPE
+            and obj.subtype == "ICHLOR"
+            and PRIM_ATTR in obj.attributes
         ):
             bodies = controller.model.getByType(BODY_TYPE)
-            intellichlor_bodies = object[BODY_ATTR].split(" ")
+            intellichlor_bodies = obj[BODY_ATTR].split(" ")
 
             body: PoolObject
             for body in bodies:
@@ -62,7 +62,7 @@ async def async_setup_entry(
                             entry,
                             controller,
                             # body,
-                            object,
+                            obj,
                             unit_of_measurement=PERCENTAGE,
                             attribute_key=attribute_key,
                             name=f"+ Output % ({body.sname})",

@@ -36,44 +36,44 @@ async def async_setup_entry(
 
     switches = []
 
-    object: PoolObject
-    for object in controller.model.objectList:
-        if object.objtype == BODY_TYPE:
-            switches.append(PoolBody(entry, controller, object))
+    obj: PoolObject
+    for obj in controller.model.objectList:
+        if obj.objtype == BODY_TYPE:
+            switches.append(PoolBody(entry, controller, obj))
         elif (
-            object.objtype == CHEM_TYPE
-            and object.subtype == "ICHLOR"
-            and SUPER_ATTR in object.attributes
+            obj.objtype == CHEM_TYPE
+            and obj.subtype == "ICHLOR"
+            and SUPER_ATTR in obj.attributes
         ):
             switches.append(
                 PoolCircuit(
                     entry,
                     controller,
-                    object,
+                    obj,
                     attribute_key=SUPER_ATTR,
                     name="+ Superchlorinate",
                     icon="mdi:alpha-s-box-outline",
                 )
             )
         elif (
-            object.objtype == CIRCUIT_TYPE
-            and not (object.isALight or object.isALightShow)
-            and object.isFeatured
+            obj.objtype == CIRCUIT_TYPE
+            and not (obj.isALight or obj.isALightShow)
+            and obj.isFeatured
         ):
             switches.append(
-                PoolCircuit(entry, controller, object, icon="mdi:alpha-f-box-outline"))
+                PoolCircuit(entry, controller, obj, icon="mdi:alpha-f-box-outline"))
         elif (
-            object.objtype == CIRCUIT_TYPE
-            and object.subtype == "CIRCGRP"
+            obj.objtype == CIRCUIT_TYPE
+            and obj.subtype == "CIRCGRP"
         ):
             switches.append(
-                PoolCircuit(entry, controller, object, icon="mdi:alpha-g-box-outline"))
-        elif object.objtype == SYSTEM_TYPE:
+                PoolCircuit(entry, controller, obj, icon="mdi:alpha-g-box-outline"))
+        elif obj.objtype == SYSTEM_TYPE:
             switches.append(
                 PoolCircuit(
                     entry,
                     controller,
-                    object,
+                    obj,
                     VACFLO_ATTR,
                     name="Vacation mode",
                     icon="mdi:palm-tree",
