@@ -1,7 +1,7 @@
 """Config flow for Pentair Intellicenter integration."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from homeassistant.config_entries import CONN_CLASS_LOCAL_PUSH, ConfigFlow
 from homeassistant.const import CONF_HOST, CONF_NAME
@@ -32,7 +32,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(
         self, user_input: Optional[ConfigType] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Handle a flow initiated by the user."""
         if user_input is None:
             return self._show_setup_form()
@@ -52,7 +52,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
         except Exception:  # pylint: disable=broad-except
             return self._show_setup_form({"base": "cannot_connect"})
 
-    async def async_step_zeroconf(self, discovery_info: ConfigType) -> Dict[str, Any]:
+    async def async_step_zeroconf(self, discovery_info: ConfigType) -> dict[str, Any]:
         """Handle device found via zeroconf."""
 
         _LOGGER.debug(f"zeroconf discovery {discovery_info}")
@@ -87,7 +87,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def async_step_zeroconf_confirm(
         self, user_input: ConfigType = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Handle a flow initiated by zeroconf."""
         if user_input is None:
             return self._show_confirm_dialog()
@@ -108,7 +108,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             title=system_info.propName, data={CONF_HOST: self.context.get(CONF_HOST)}
         )
 
-    def _show_setup_form(self, errors: Optional[Dict] = None) -> Dict[str, Any]:
+    def _show_setup_form(self, errors: Optional[dict] = None) -> dict[str, Any]:
         """Show the setup form to the user."""
         return self.async_show_form(
             step_id="user",
@@ -116,7 +116,7 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors or {},
         )
 
-    def _show_confirm_dialog(self) -> Dict[str, Any]:
+    def _show_confirm_dialog(self) -> dict[str, Any]:
         """Show the confirm dialog to the user."""
 
         host = self.context.get(CONF_HOST)
