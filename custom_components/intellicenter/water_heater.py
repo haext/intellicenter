@@ -74,6 +74,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
     """Representation of a Pentair water heater."""
 
     LAST_HEATER_ATTR = "LAST_HEATER"
+    HEATERS_LITS_ATTR = "HEATERS_LIST"
 
     def __init__(
         self,
@@ -99,6 +100,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
 
         state_attributes = super().extra_state_attributes
 
+        state_attributes[self.HEATERS_LITS_ATTR] = self._heater_list
         if self._lastHeater != NULL_OBJNAM:
             state_attributes[self.LAST_HEATER_ATTR] = self._lastHeater
 
