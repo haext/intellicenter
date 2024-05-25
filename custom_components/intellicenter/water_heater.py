@@ -1,7 +1,7 @@
 """Pentair Intellicenter water heaters."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from homeassistant.components.water_heater import (
     WaterHeaterEntity,
@@ -10,7 +10,7 @@ from homeassistant.components.water_heater import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, STATE_IDLE, STATE_OFF, STATE_ON
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.core import HomeAssistant
 
 from . import PoolEntity
 from .const import DOMAIN
@@ -34,7 +34,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistantType, entry: ConfigEntry, async_add_entities
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
     """Load pool sensors based on a config entry."""
 
@@ -94,7 +94,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
         self._attr_icon = "mdi:thermometer"
 
     @property
-    def extra_state_attributes(self) -> Optional[Dict[str, Any]]:
+    def extra_state_attributes(self) -> Optional[dict[str, Any]]:
         """Return the state attributes of the entity."""
 
         state_attributes = super().extra_state_attributes
@@ -195,7 +195,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
     def _turnOff(self):
         self.requestChanges({HEATER_ATTR: NULL_OBJNAM})
 
-    def isUpdated(self, updates: Dict[str, Dict[str, str]]) -> bool:
+    def isUpdated(self, updates: dict[str, dict[str, str]]) -> bool:
         """Return true if the entity is updated by the updates from Intellicenter."""
 
         myUpdates = updates.get(self._poolObject.objnam, {})

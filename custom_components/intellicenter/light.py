@@ -2,7 +2,7 @@
 
 from functools import reduce
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from homeassistant.components.light import (
     ATTR_EFFECT,
@@ -11,7 +11,7 @@ from homeassistant.components.light import (
     LightEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.core import HomeAssistant
 
 from . import PoolEntity
 from .const import DOMAIN
@@ -42,7 +42,7 @@ LIGHTS_EFFECTS = {
 
 
 async def async_setup_entry(
-    hass: HomeAssistantType, entry: ConfigEntry, async_add_entities
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
     """Load pool lights based on a config entry."""
 
@@ -50,31 +50,28 @@ async def async_setup_entry(
 
     lights = []
 
-    object: PoolObject
-    for object in controller.model.objectList:
-        if object.isALight:
+    obj: PoolObject
+    for obj in controller.model.objectList:
+        if obj.isALight:
             lights.append(
                 PoolLight(
                     entry,
                     controller,
-                    object,
-                    LIGHTS_EFFECTS if object.supportColorEffects else None,
+                    obj,
+                    LIGHTS_EFFECTS if obj.supportColorEffects else None,
                 )
             )
-        elif object.isALightShow:
+        elif obj.isALightShow:
             supportColorEffects = reduce(
                 lambda x, y: x and y,
-                map(
-                    lambda obj: controller.model[obj[CIRCUIT_ATTR]].supportColorEffects,
-                    controller.model.getChildren(object),
-                ),
+                (controller.model[obj[CIRCUIT_ATTR]].supportColorEffects for obj in controller.model.getChildren(obj)),
                 True,
             )
             lights.append(
                 PoolLight(
                     entry,
                     controller,
-                    object,
+                    obj,
                     LIGHTS_EFFECTS if supportColorEffects else None,
                 )
             )
@@ -85,20 +82,21 @@ async def async_setup_entry(
 class PoolLight(PoolEntity, LightEntity):
     """Representation of an Pentair light."""
 
+    _attr_color_mode = ColorMode.ONOFF
+    _attr_supported_color_modes = {ColorMode.ONOFF}
+    _attr_supported_features = LightEntityFeature(0)
+
     def __init__(
         self,
         entry: ConfigEntry,
         controller: ModelController,
         poolObject: PoolObject,
-        colorEffects: dict = None,
+        colorEffects: dict | None = None,
     ):
         """Initialize."""
         super().__init__(entry, controller, poolObject)
         # USE appears to contain extra info like color...
         self._extra_state_attributes = [USE_ATTR]
-
-        self._features = 0
-        self._supported_color_modes = ColorMode.ONOFF
 
         self._lightEffects = colorEffects
         self._reversedLightEffects = (
@@ -106,12 +104,7 @@ class PoolLight(PoolEntity, LightEntity):
         )
 
         if self._lightEffects:
-            self._features |= LightEntityFeature.EFFECT
-
-    @property
-    def supported_features(self) -> int:
-        """Return supported features."""
-        return self._features
+            self._attr_supported_features |= LightEntityFeature.EFFECT
 
     @property
     def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
@@ -150,7 +143,7 @@ class PoolLight(PoolEntity, LightEntity):
 
         self.requestChanges(changes)
 
-    def isUpdated(self, updates: Dict[str, Dict[str, str]]) -> bool:
+    def isUpdated(self, updates: dict[str, dict[str, str]]) -> bool:
         """Return true if the entity is updated by the updates from Intellicenter."""
 
         myUpdates = updates.get(self._poolObject.objnam, {})
