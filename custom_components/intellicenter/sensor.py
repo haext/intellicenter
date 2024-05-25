@@ -3,17 +3,14 @@
 import logging
 from typing import Optional
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    CONCENTRATION_PARTS_PER_MILLION,
-    UnitOfPower,
-)
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONCENTRATION_PARTS_PER_MILLION, UnitOfPower
+from homeassistant.core import HomeAssistant
 
 from . import PoolEntity
 from .const import CONST_GPM, CONST_RPM, DOMAIN
@@ -44,7 +41,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistantType, entry: ConfigEntry, async_add_entities
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
     """Load pool sensors based on a config entry."""
 
@@ -52,25 +49,25 @@ async def async_setup_entry(
 
     sensors = []
 
-    object: PoolObject
-    for object in controller.model.objectList:
-        if object.objtype == SENSE_TYPE:
+    obj: PoolObject
+    for obj in controller.model.objectList:
+        if obj.objtype == SENSE_TYPE:
             sensors.append(
                 PoolSensor(
                     entry,
                     controller,
-                    object,
+                    obj,
                     device_class=SensorDeviceClass.TEMPERATURE,
                     attribute_key=SOURCE_ATTR,
                 )
             )
-        elif object.objtype == PUMP_TYPE:
-            if object[PWR_ATTR]:
+        elif obj.objtype == PUMP_TYPE:
+            if obj[PWR_ATTR]:
                 sensors.append(
                     PoolSensor(
                         entry,
                         controller,
-                        object,
+                        obj,
                         device_class=SensorDeviceClass.POWER,
                         unit_of_measurement=UnitOfPower.WATT,
                         attribute_key=PWR_ATTR,
@@ -78,36 +75,36 @@ async def async_setup_entry(
                         rounding_factor=25,
                     )
                 )
-            if object[RPM_ATTR]:
+            if obj[RPM_ATTR]:
                 sensors.append(
                     PoolSensor(
                         entry,
                         controller,
-                        object,
+                        obj,
                         device_class=None,
                         unit_of_measurement=CONST_RPM,
                         attribute_key=RPM_ATTR,
                         name="+ rpm",
                     )
                 )
-            if object[GPM_ATTR]:
+            if obj[GPM_ATTR]:
                 sensors.append(
                     PoolSensor(
                         entry,
                         controller,
-                        object,
+                        obj,
                         device_class=None,
                         unit_of_measurement=CONST_GPM,
                         attribute_key=GPM_ATTR,
                         name="+ gpm",
                     )
                 )
-        elif object.objtype == BODY_TYPE:
+        elif obj.objtype == BODY_TYPE:
             sensors.append(
                 PoolSensor(
                     entry,
                     controller,
-                    object,
+                    obj,
                     device_class=SensorDeviceClass.TEMPERATURE,
                     attribute_key=LSTTMP_ATTR,
                     name="+ last temp",
@@ -117,76 +114,76 @@ async def async_setup_entry(
                 PoolSensor(
                     entry,
                     controller,
-                    object,
+                    obj,
                     device_class=SensorDeviceClass.TEMPERATURE,
                     attribute_key=LOTMP_ATTR,
                     name="+ desired temp",
                 )
             )
-        elif object.objtype == CHEM_TYPE:
-            if object.subtype == "ICHEM":
-                if PHVAL_ATTR in object.attributes:
+        elif obj.objtype == CHEM_TYPE:
+            if obj.subtype == "ICHEM":
+                if PHVAL_ATTR in obj.attributes:
                     sensors.append(
                         PoolSensor(
                             entry,
                             controller,
-                            object,
+                            obj,
                             device_class=None,
                             attribute_key=PHVAL_ATTR,
                             name="+ (pH)",
                         )
                     )
-                if ORPVAL_ATTR in object.attributes:
+                if ORPVAL_ATTR in obj.attributes:
                     sensors.append(
                         PoolSensor(
                             entry,
                             controller,
-                            object,
+                            obj,
                             device_class=None,
                             attribute_key=ORPVAL_ATTR,
                             name="+ (ORP)",
                         )
                     )
-                if QUALTY_ATTR in object.attributes:
+                if QUALTY_ATTR in obj.attributes:
                     sensors.append(
                         PoolSensor(
                             entry,
                             controller,
-                            object,
+                            obj,
                             device_class=None,
                             attribute_key=QUALTY_ATTR,
                             name="+ (Water Quality)",
                         )
                     )
-                if PHTNK_ATTR in object.attributes:
+                if PHTNK_ATTR in obj.attributes:
                     sensors.append(
                         PoolSensor(
                             entry,
                             controller,
-                            object,
+                            obj,
                             device_class=None,
                             attribute_key=PHTNK_ATTR,
                             name="+ (Ph Tank Level)",
                         )
                     )
-                if ORPTNK_ATTR in object.attributes:
+                if ORPTNK_ATTR in obj.attributes:
                     sensors.append(
                         PoolSensor(
                             entry,
                             controller,
-                            object,
+                            obj,
                             device_class=None,
                             attribute_key=ORPTNK_ATTR,
                             name="+ (ORP Tank Level)",
                         )
                     )
-            elif object.subtype == "ICHLOR":
-                if SALT_ATTR in object.attributes:
+            elif obj.subtype == "ICHLOR":
+                if SALT_ATTR in obj.attributes:
                     sensors.append(
                         PoolSensor(
                             entry,
                             controller,
-                            object,
+                            obj,
                             device_class=None,
                             unit_of_measurement=CONCENTRATION_PARTS_PER_MILLION,
                             attribute_key=SALT_ATTR,

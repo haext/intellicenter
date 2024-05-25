@@ -5,7 +5,7 @@ from asyncio import Future
 from hashlib import blake2b
 import logging
 import traceback
-from typing import Dict, Optional
+from typing import Optional
 
 from .attributes import (
     MODE_ATTR,
@@ -513,7 +513,7 @@ class ConnectionHandler:
         """Handle the fact that we will retry connection in {delay} seconds."""
         _LOGGER.info(f"will attempt to reconnect in {delay}s")
 
-    def updated(self, controller: ModelController, updates: Dict):
+    def updated(self, controller: ModelController, updates: dict):
         """Handle the callback that our underlying system has been modified.
 
         only invoked if the controller has a _updatedCallback attribute
