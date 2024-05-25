@@ -255,14 +255,16 @@ class PoolEntity(Entity):
     def name(self):
         """Return the name of the entity."""
 
+        propName = _controller.systemInfo.propName + " ";
+
         if self._attr_name is None:
             # default is to return the name of the underlying pool object
-            return self._poolObject.sname
+            return propName + self._poolObject.sname
         elif self._attr_name.startswith("+"):
             # name is a suffix
-            return self._poolObject.sname + self._attr_name[1:]
+            return propName + self._poolObject.sname + self._attr_name[1:]
         else:
-            return self._attr_name
+            return propName + self._attr_name
 
     @property
     def unique_id(self):
