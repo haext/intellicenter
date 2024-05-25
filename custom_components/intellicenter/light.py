@@ -107,11 +107,6 @@ class PoolLight(PoolEntity, LightEntity):
             self._attr_supported_features |= LightEntityFeature.EFFECT
 
     @property
-    def supported_color_modes(self) -> set[ColorMode] | set[str] | None:
-        """Return supported color modes."""
-        return self._supported_color_modes
-
-    @property
     def effect_list(self) -> list:
         """Return the list of supported effects."""
         return list(self._reversedLightEffects.keys())
