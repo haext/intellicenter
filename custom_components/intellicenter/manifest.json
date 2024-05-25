@@ -1,7 +1,7 @@
 {
     "domain": "intellicenter",
     "name": "Pentair IntelliCenter",
-    "codeowners": ["@dwradcliffe"],
+    "codeowners": ["@gdgib"],
     "config_flow": true,
     "dependencies": [],
     "documentation": "https://github.com/dwradcliffe/intellicenter",
@@ -9,7 +9,7 @@
     "issue_tracker": "https://github.com/dwradcliffe/intellicenter/issues",
     "quality_scale": "gold",
     "requirements": [],
-    "version": "1.4.0a3",
+    "version": "1.4.0a4",
     "zeroconf": [
         { "type":"_http._tcp.local.", "name":"pentair*" }
       ]
