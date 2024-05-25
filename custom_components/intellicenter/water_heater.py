@@ -155,8 +155,8 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
         self.requestChanges({LOTMP_ATTR: str(int(target_temperature))})
 
     @property
-    def operation_mode(self):
-        """Return operation mode."""
+    def current_operation(self):
+        """Return current operation."""
         heater = self._poolObject[HEATER_ATTR]
         if heater in self._heater_list:
             return self._controller.model[heater].sname
