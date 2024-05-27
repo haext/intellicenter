@@ -73,7 +73,9 @@ async def async_setup_entry(
 class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
     """Representation of a Pentair water heater."""
 
-    LAST_HEATER_ATTR = "LAST_HEATER"
+    LAST_HEATER_ATTR = "last_heater"
+    HEATERS_LIST_ATTR = "heaters"
+    HEATING = "heating"
 
     def __init__(
         self,
@@ -99,6 +101,8 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
 
         state_attributes = super().extra_state_attributes
 
+        state_attributes[self.HEATERS_LIST_ATTR] = self._heater_list
+        state_attributes[self.HEATING] = STATE_ON if int(self._poolObject[HTMODE_ATTR]) > 0 else STATE_OFF
         if self._lastHeater != NULL_OBJNAM:
             state_attributes[self.LAST_HEATER_ATTR] = self._lastHeater
 
@@ -111,8 +115,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
         heater = self._poolObject[HEATER_ATTR]
         if status == "OFF" or heater == NULL_OBJNAM:
             return STATE_OFF
-        htmode = self._poolObject[HTMODE_ATTR]
-        return STATE_ON if htmode != "0" else STATE_IDLE
+        return self.current_operation;
 
     @property
     def unique_id(self):
@@ -155,8 +158,8 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
         self.requestChanges({LOTMP_ATTR: str(int(target_temperature))})
 
     @property
-    def operation_mode(self):
-        """Return operation mode."""
+    def current_operation(self):
+        """Return current operation."""
         heater = self._poolObject[HEATER_ATTR]
         if heater in self._heater_list:
             return self._controller.model[heater].sname
@@ -169,7 +172,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
             self._controller.model[heater].sname for heater in self._heater_list
         ]
 
-    def set_operation_mode(self, operation_mode):
+    async def async_set_operation_mode(self, operation_mode):
         """Set new target operation mode."""
         if operation_mode == STATE_OFF:
             self._turnOff()
