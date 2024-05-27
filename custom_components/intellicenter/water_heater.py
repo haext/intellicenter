@@ -73,8 +73,9 @@ async def async_setup_entry(
 class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
     """Representation of a Pentair water heater."""
 
-    LAST_HEATER_ATTR = "LAST_HEATER"
-    HEATERS_LITS_ATTR = "HEATERS_LIST"
+    LAST_HEATER_ATTR = "last_heater"
+    HEATERS_LIST_ATTR = "heaters"
+    HEATING = "heating"
 
     def __init__(
         self,
@@ -100,7 +101,8 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
 
         state_attributes = super().extra_state_attributes
 
-        state_attributes[self.HEATERS_LITS_ATTR] = self._heater_list
+        state_attributes[self.HEATERS_LIST_ATTR] = self._heater_list
+        state_attributes[self.HEATING] = STATE_ON if self._poolObject[HTMODE_ATTR] > 0 else STATE_OFF
         if self._lastHeater != NULL_OBJNAM:
             state_attributes[self.LAST_HEATER_ATTR] = self._lastHeater
 
@@ -113,8 +115,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
         heater = self._poolObject[HEATER_ATTR]
         if status == "OFF" or heater == NULL_OBJNAM:
             return STATE_OFF
-        htmode = self._poolObject[HTMODE_ATTR]
-        return STATE_ON if htmode != "0" else STATE_IDLE
+        return self.current_operation();
 
     @property
     def unique_id(self):
