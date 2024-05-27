@@ -102,7 +102,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
         state_attributes = super().extra_state_attributes
 
         state_attributes[self.HEATERS_LIST_ATTR] = self._heater_list
-        state_attributes[self.HEATING] = STATE_ON if self._poolObject[HTMODE_ATTR] > 0 else STATE_OFF
+        state_attributes[self.HEATING] = STATE_ON if int(self._poolObject[HTMODE_ATTR]) > 0 else STATE_OFF
         if self._lastHeater != NULL_OBJNAM:
             state_attributes[self.LAST_HEATER_ATTR] = self._lastHeater
 
