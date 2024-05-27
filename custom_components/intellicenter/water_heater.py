@@ -115,7 +115,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
         heater = self._poolObject[HEATER_ATTR]
         if status == "OFF" or heater == NULL_OBJNAM:
             return STATE_OFF
-        return self.current_operation();
+        return self.current_operation;
 
     @property
     def unique_id(self):
@@ -172,7 +172,7 @@ class PoolWaterHeater(PoolEntity, WaterHeaterEntity, RestoreEntity):
             self._controller.model[heater].sname for heater in self._heater_list
         ]
 
-    def set_operation_mode(self, operation_mode):
+    async def async_set_operation_mode(self, operation_mode):
         """Set new target operation mode."""
         if operation_mode == STATE_OFF:
             self._turnOff()
