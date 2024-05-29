@@ -255,7 +255,7 @@ class PoolEntity(Entity):
     def name(self):
         """Return the name of the entity."""
 
-        propName = _controller.systemInfo.propName + " ";
+        propName = self._controller.systemInfo.propName + " ";
 
         if self._attr_name is None:
             # default is to return the name of the underlying pool object
