@@ -19,8 +19,6 @@ class ICProtocol(asyncio.Protocol):
     - receiving data from the transport and combining it into a proper json object
     - managing a 'only-one-request-out-one-the-wire' policy
     this is more a "works better that way" thand a real requirement as far as know
-    - sending regular (every 10s) 'ping' requests and closing the connection if 'pong'
-    replies are not received fast enough (we allow 2 outstanding which is generous)
     """
 
     def __init__(self, controller):
@@ -40,9 +38,6 @@ class ICProtocol(asyncio.Protocol):
         # see sendRequest and responseReceived for details
         self._out_pending = 0
         self._out_queue = SimpleQueue()
-
-        # and the number of unacknowledgged ping issued
-        self._num_unacked_pings = 0
 
     def connection_made(self, transport):
         """Handle the callback for a successful connection."""
@@ -134,14 +129,6 @@ class ICProtocol(asyncio.Protocol):
         """Process a given message from IntelliCenter."""
 
         _LOGGER.debug(f"PROTOCOL: processMessage {message}")
-
-        # if message is 'pong', response for a previous 'ping'
-        # do nothing except noting a response was received
-        if message == "pong":
-            self.responseReceived()
-            self._num_unacked_pings -= 1
-            _LOGGER.debug("ping acknowledged")
-            return
 
         # a number of issues could be happening in this code section
         # let's wrap the whole thing in a broad catch statement
