@@ -1,6 +1,7 @@
 """Protocol for communicating with a Pentair system."""
 
 import asyncio
+import time
 import json
 import logging
 from queue import SimpleQueue
@@ -108,8 +109,22 @@ class ICProtocol(asyncio.Protocol):
         else:
             # there is already something on the wire, let's queue the request
             self._out_queue.put(request)
+            if self._out_pending == 1:
+                self._out_pending_since = time.time()
+                self._out_pending_first = request
+            elif time.time() - self._out_pending_since > 60:
+                # we have been waiting for a minute for the last response
+                # we assume the connection went bad and abort
+                # unfortunately, some messages will have been lost
+                _LOGGER.error(f"PROTOCOL: waited for response for {self._out_pending_first} for one minute, closing connection; {self._out_pending + 1} messages lost")
+                self._lineBuffer = ""
+                self._out_pending = 0
+                self._out_queue = SimpleQueue()
+                self._transport.close()
+                return
 
         # and count the new request as pending
+
         self._out_pending += 1
 
     def responseReceived(self) -> None:
