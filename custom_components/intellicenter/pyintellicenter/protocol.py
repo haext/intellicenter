@@ -105,11 +105,17 @@ class ICProtocol(asyncio.Protocol):
 
         if self._out_pending == 0:
             # nothing is progress, we can transmit the packet
-            self._writeToTransport(request)
+            # and count the new request as pending
+            self._out_pending += 1
+            self._writeToTransport(request) # !!! We can get a responseReceived here, which will not see the incremented _out_pending, and do the wrong thing!
         else:
             # there is already something on the wire, let's queue the request
+            first_pending = self._out_pending == 1
+            # and count the new request as pending
+            self._out_pending += 1
             self._out_queue.put(request)
-            if self._out_pending == 1:
+            _LOGGER.error(f"PROTOCOL: queuing request {request}; {self._out_pending} messages pending")
+            if first_pending:
                 self._out_pending_since = time.time()
                 self._out_pending_first = request
             elif time.time() - self._out_pending_since > 60:
@@ -123,18 +129,16 @@ class ICProtocol(asyncio.Protocol):
                 self._transport.close()
                 return
 
-        # and count the new request as pending
-
-        self._out_pending += 1
-
     def responseReceived(self) -> None:
         """Handle the flow control part of a received rsponse."""
 
         # we know that a response has been received
         # so, if we have a pending request in the queue
         # we can write it to our transport
+
         if not self._out_queue.empty():
             request = self._out_queue.get()
+            _LOGGER.error(f"PROTOCOL: dequeuing request {request}; {self._out_pending - 1} messages pending")
             self._writeToTransport(request)
         # no matter what, we have now one less request pending
         if self._out_pending:
