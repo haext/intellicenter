@@ -239,7 +239,7 @@ class BaseController:
         """Return the current 'configuration' of the system."""
         return self.getQuery("GetConfiguration")
 
-    def receivedMessage(self, msg_id: str, command: str, response: str, msg: dict):
+    async def receivedMessage(self, msg_id: str, command: str, response: str, msg: dict):
         """Handle the callback for a incoming message.
 
         msd_id is the id of the incoming message
@@ -268,11 +268,11 @@ class BaseController:
             else:
                 _LOGGER.debug(f"ignoring response for msg_id {msg_id}")
         elif response is None or response == "200":
-            self.processMessage(command, msg)
+            await self.processMessage(command, msg)
         else:
             _LOGGER.warning(f"CONTROLLER: error {response} : {msg}")
 
-    def processMessage(self, command: str, msg):
+    async def processMessage(self, command: str, msg):
         """Process a notification message."""
         pass
 
@@ -330,19 +330,19 @@ class ModelController(BaseController):
                 # we split them in maximum of 50 attributes (arbitrary but seems to work)
                 if numAttributes >= 50:
                     res = await self.sendCmd("RequestParamList", {"objectList": query})
-                    self._applyUpdates(res["objectList"])
+                    await self._applyUpdates(res["objectList"])
                     query = []
                     numAttributes = 0
             # and issue the remaining elements if any
             if query:
                 res = await self.sendCmd("RequestParamList", {"objectList": query})
-                self._applyUpdates(res["objectList"])
+                await self._applyUpdates(res["objectList"])
 
         except Exception as err:
             traceback.print_exc()
             raise err
 
-    def receivedQueryResult(self, queryName: str, answer):
+    async def receivedQueryResult(self, queryName: str, answer):
         """Handle the result of all 'getQuery' responses."""
 
         # none are used by default
@@ -351,7 +351,7 @@ class ModelController(BaseController):
 
         pass
 
-    def _applyUpdates(self, changesAsList):
+    async def _applyUpdates(self, changesAsList):
         """Apply updates received to the model."""
 
         updates = self._model.processUpdates(changesAsList)
@@ -363,30 +363,30 @@ class ModelController(BaseController):
             self._systemInfo.update(updates[systemObjnam])
 
         if updates and self._updatedCallback:
-            self._updatedCallback(self, updates)
+            await self._updatedCallback(self, updates)
 
         return updates
 
-    def receivedNotifyList(self, changes):
+    async def receivedNotifyList(self, changes):
         """Handle the notifications from IntelliCenter when tracked objects are modified."""
 
         try:
             # apply the changes back to the model
-            self._applyUpdates(changes)
+            await self._applyUpdates(changes)
 
         except Exception as err:
             _LOGGER.error(f"CONTROLLER: receivedNotifyList {err}")
 
-    def receivedWriteParamList(self, changes):
+    async def receivedWriteParamList(self, changes):
         """Handle the response to a change requested on an object."""
 
         try:
-            self._applyUpdates(changes)
+            async self._applyUpdates(changes)
 
         except Exception as err:
             _LOGGER.error(f"CONTROLLER: receivedWriteParamList {err}")
 
-    def receivedSystemConfig(self, objectList):
+    async def receivedSystemConfig(self, objectList):
         """Handle the response for a request for objects."""
 
         _LOGGER.debug(
@@ -396,20 +396,20 @@ class ModelController(BaseController):
         # note that here we might create new objects
         self.model.addObjects(objectList)
 
-    def processMessage(self, command: str, msg):
+    async def processMessage(self, command: str, msg):
         """Handle the callback for an incoming message."""
 
         _LOGGER.debug(f"CONTROLLER: received {command} response: {msg}")
 
         try:
             if command == "SendQuery":
-                self.receivedQueryResult(msg["queryName"], msg["answer"])
+                await self.receivedQueryResult(msg["queryName"], msg["answer"])
             elif command == "NotifyList":
-                self.receivedNotifyList(msg["objectList"])
+                await self.receivedNotifyList(msg["objectList"])
             elif command == "WriteParamList":
-                self.receivedWriteParamList(msg["objectList"][0]["changes"])
+                await self.receivedWriteParamList(msg["objectList"][0]["changes"])
             elif command == "SendParamList":
-                self.receivedSystemConfig(msg["objectList"])
+                await self.receivedSystemConfig(msg["objectList"])
             else:
                 _LOGGER.debug(f"no handler for {command}")
         except Exception as err:

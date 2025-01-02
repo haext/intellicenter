@@ -58,7 +58,7 @@ class ICProtocol(asyncio.Protocol):
 
         await self._controller.connection_lost(exc)
 
-    def data_received(self, data) -> None:
+    async def data_received(self, data) -> None:
         """Handle the callback for data received."""
 
         data = data.decode()
@@ -80,7 +80,7 @@ class ICProtocol(asyncio.Protocol):
         for line in lines:
             if line:
                 # and process each line individually
-                self.processMessage(line)
+                await self.processMessage(line)
 
     def sendCmd(self, cmd: str, extra: dict = None) -> str:
         """Send a command and return a generated msg id."""
@@ -130,7 +130,7 @@ class ICProtocol(asyncio.Protocol):
         if self._out_pending:
             self._out_pending -= 1
 
-    def processMessage(self, message: str) -> None:
+    async def processMessage(self, message: str) -> None:
         """Process a given message from IntelliCenter."""
 
         _LOGGER.debug(f"PROTOCOL: processMessage {message}")
@@ -167,7 +167,7 @@ class ICProtocol(asyncio.Protocol):
                 self.responseReceived()
 
             # let's pass our message back to the controller for handling its semantic...
-            self._controller.receivedMessage(msg_id, command, response, msg)
+            await self._controller.receivedMessage(msg_id, command, response, msg)
 
         except Exception as err:
             _LOGGER.error(f"PROTOCOL: exception while receiving message {err}")
