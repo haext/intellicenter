@@ -491,7 +491,7 @@ class ConnectionHandler:
             self._starterTask = None
         self._controller.stop()
 
-    async def _diconnectedCallback(self, controller, err):
+    async def _disconnectedCallback(self, controller, err):
         """Handle the disconnection of the underlying controller."""
         await self.disconnected(controller, err)
         if not self._stopped:
