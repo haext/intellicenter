@@ -53,10 +53,10 @@ class ICProtocol(asyncio.Protocol):
         # and notify our controller that we are ready!
         self._controller.connection_made(self, transport)
 
-    def connection_lost(self, exc):
+    async def connection_lost(self, exc):
         """Handle the callback for connection lost."""
 
-        self._controller.connection_lost(exc)
+        await self._controller.connection_lost(exc)
 
     def data_received(self, data) -> None:
         """Handle the callback for data received."""

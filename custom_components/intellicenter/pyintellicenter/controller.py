@@ -128,7 +128,7 @@ class BaseController:
         """Handle the callback from the protocol."""
         _LOGGER.debug(f"Connection established to {self._host}")
 
-    def connection_lost(self, exc):
+    async def connection_lost(self, exc):
         """Handle the callback from the protocol."""
         self.stop()  # should that be a cleanup instead?
         if self._disconnectedCallback:
