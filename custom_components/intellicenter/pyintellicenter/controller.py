@@ -115,7 +115,7 @@ class BaseController:
         self._transport = None
         self._protocol = None
 
-        self._diconnectedCallback = None
+        self._disconnectedCallback = None
 
         self._requests = {}
 
@@ -131,8 +131,8 @@ class BaseController:
     def connection_lost(self, exc):
         """Handle the callback from the protocol."""
         self.stop()  # should that be a cleanup instead?
-        if self._diconnectedCallback:
-            self._diconnectedCallback(self, exc)
+        if self._disconnectedCallback:
+            await self._disconnectedCallback(self, exc)
 
     async def start(self) -> None:
         """Connect to the Pentair system and retrieves some system information."""
@@ -433,7 +433,7 @@ class ConnectionHandler:
 
         self._timeBetweenReconnects = timeBetweenReconnects
 
-        controller._diconnectedCallback = self._diconnectedCallback
+        controller._disconnectedCallback = self._disconnectedCallback
 
         if hasattr(controller, "_updatedCallback"):
             controller._updatedCallback = self.updated
@@ -491,7 +491,7 @@ class ConnectionHandler:
             self._starterTask = None
         self._controller.stop()
 
-    def _diconnectedCallback(self, controller, err):
+    async def _diconnectedCallback(self, controller, err):
         """Handle the disconnection of the underlying controller."""
         await self.disconnected(controller, err)
         if not self._stopped:
