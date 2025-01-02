@@ -381,7 +381,7 @@ class ModelController(BaseController):
         """Handle the response to a change requested on an object."""
 
         try:
-            async self._applyUpdates(changes)
+            await self._applyUpdates(changes)
 
         except Exception as err:
             _LOGGER.error(f"CONTROLLER: receivedWriteParamList {err}")
