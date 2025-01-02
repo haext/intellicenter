@@ -104,20 +104,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         UPDATE_SIGNAL = DOMAIN + "_UPDATE_" + entry.entry_id
         CONNECTION_SIGNAL = DOMAIN + "_CONNECTION_" + entry.entry_id
 
-        def started(self, controller):
+        async def started(self, controller):
             _LOGGER.info(f"connected to system: '{controller.systemInfo.propName}'")
             for object in controller.model:
                 _LOGGER.debug(f"   loaded {object}")
             await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
         @callback
-        def reconnected(self, controller):
+        async def reconnected(self, controller):
             """Handle reconnection from the Pentair system."""
             _LOGGER.info(f"reconnected to system: '{controller.systemInfo.propName}'")
             dispatcher.async_dispatcher_send(hass, self.CONNECTION_SIGNAL, True)
 
         @callback
-        def disconnected(self, controller, exc):
+        async def disconnected(self, controller, exc):
             """Handle updates from the Pentair system."""
             _LOGGER.info(
                 f"disconnected from system: '{controller.systemInfo.propName}'"
@@ -125,7 +125,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             dispatcher.async_dispatcher_send(hass, self.CONNECTION_SIGNAL, False)
 
         @callback
-        def updated(self, controller, updates: dict[str, PoolObject]):
+        async def updated(self, controller, updates: dict[str, PoolObject]):
             """Handle updates from the Pentair system."""
             _LOGGER.debug(f"received update for {len(updates)} pool objects")
             dispatcher.async_dispatcher_send(hass, self.UPDATE_SIGNAL, updates)

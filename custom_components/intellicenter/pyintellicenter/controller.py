@@ -469,16 +469,16 @@ class ConnectionHandler:
                 await self._controller.start()
 
                 if self._firstTime:
-                    self.started(self._controller)
+                    await self.started(self._controller)
                     self._firstTime = False
                 else:
-                    self.reconnected(self._controller)
+                    await self.reconnected(self._controller)
 
                 started = True
                 self._starterTask = None
             except Exception as err:
                 _LOGGER.error(f"cannot start: {err}")
-                self.retrying(delay)
+                await self.retrying(delay)
                 await asyncio.sleep(delay)
                 delay = self._next_delay(delay)
 
@@ -493,7 +493,7 @@ class ConnectionHandler:
 
     def _diconnectedCallback(self, controller, err):
         """Handle the disconnection of the underlying controller."""
-        self.disconnected(controller, err)
+        await self.disconnected(controller, err)
         if not self._stopped:
             _LOGGER.error(
                 f"system disconnected  from {self._controller.host} {err if err else ''}"
@@ -502,18 +502,18 @@ class ConnectionHandler:
                 self._starter(self._timeBetweenReconnects)
             )
 
-    def started(self, controller):
+    async def started(self, controller):
         """Handle the first time the controller is started.
 
         further reconnections will trigger reconnected method instead
         """
         pass
 
-    def retrying(self, delay):
+    async def retrying(self, delay):
         """Handle the fact that we will retry connection in {delay} seconds."""
         _LOGGER.info(f"will attempt to reconnect in {delay}s")
 
-    def updated(self, controller: ModelController, updates: dict):
+    async def updated(self, controller: ModelController, updates: dict):
         """Handle the callback that our underlying system has been modified.
 
         only invoked if the controller has a _updatedCallback attribute
@@ -521,7 +521,7 @@ class ConnectionHandler:
         """
         pass
 
-    def disconnected(self, controller, exc):
+    async def disconnected(self, controller, exc):
         """Handle the controller being disconnected.
 
         exc will contain the underlying exception except if
@@ -529,7 +529,7 @@ class ConnectionHandler:
         """
         pass
 
-    def reconnected(self, controller):
+    async def reconnected(self, controller):
         """Handle the controller being reconnected.
 
         only occurs if the controller was connected before
