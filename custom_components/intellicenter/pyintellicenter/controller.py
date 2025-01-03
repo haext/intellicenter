@@ -116,6 +116,7 @@ class BaseController:
         self._protocol = None
 
         self._diconnectedCallback = None
+        self._systemInfo = None
 
         self._requests = {}
 
