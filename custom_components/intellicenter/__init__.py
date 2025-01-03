@@ -1,4 +1,5 @@
 """Pentair IntelliCenter Integration."""
+import asyncio
 import logging
 from typing import Any, Optional
 
