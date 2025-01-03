@@ -112,10 +112,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             async def setup_platforms():
                 """Set up platforms."""
-                await asyncio.gather(
-                    hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-                )
-                # dispatcher.async_dispatcher_send(hass, self.CONNECTION_SIGNAL, True)
+                hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
             hass.async_create_task(setup_platforms())
 
         @callback
