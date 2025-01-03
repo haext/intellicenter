@@ -99,32 +99,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         SYSTEM_TYPE: {MODE_ATTR, VACFLO_ATTR},
     }
     model = PoolModel(attributes_map)
-
     controller = ModelController(entry.data[CONF_HOST], model, loop=hass.loop)
 
     class Handler(ConnectionHandler):
-
         UPDATE_SIGNAL = DOMAIN + "_UPDATE_" + entry.entry_id
         CONNECTION_SIGNAL = DOMAIN + "_CONNECTION_" + entry.entry_id
 
         def started(self, controller):
-
             _LOGGER.info(f"connected to system: '{controller.systemInfo.propName}'")
-
             for object in controller.model:
                 _LOGGER.debug(f"   loaded {object}")
 
             async def setup_platforms():
                 """Set up platforms."""
                 await asyncio.gather(
-                    *[
-                        hass.config_entries.async_forward_entry_setup(entry, platform)
-                        for platform in PLATFORMS
-                    ]
+                    hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
                 )
-
                 # dispatcher.async_dispatcher_send(hass, self.CONNECTION_SIGNAL, True)
-
             hass.async_create_task(setup_platforms())
 
         @callback
@@ -148,23 +139,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             dispatcher.async_dispatcher_send(hass, self.UPDATE_SIGNAL, updates)
 
     try:
-
         handler = Handler(controller)
-
         await handler.start()
-
         hass.data.setdefault(DOMAIN, {})
-
         hass.data[DOMAIN][entry.entry_id] = handler
 
         # subscribe to Home Assistant STOP event to do some cleanup
-
         async def on_hass_stop(event):
             """Stop push updates when hass stops."""
             handler.stop()
 
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, on_hass_stop)
-
         return True
     except ConnectionRefusedError as err:
         raise ConfigEntryNotReady from err
@@ -174,28 +159,23 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload IntelliCenter config entry."""
 
     # Unload entities for this entry/device.
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
-    all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-            ]
-        )
-    )
+    if unload_ok:
+      # Cleanup
+      handler = hass.data[DOMAIN].pop(entry.entry_id, None)
 
-    # Cleanup
-    handler = hass.data[DOMAIN].pop(entry.entry_id, None)
-
-    _LOGGER.info(f"unloading integration {entry.entry_id}")
-    if handler:
+      _LOGGER.info(f"unloading integration {entry.entry_id}")
+      if handler:
         handler.stop()
 
-    # if it was the last instance of this integration, clear up the DOMAIN entry
-    if not hass.data[DOMAIN]:
-        del hass.data[DOMAIN]
+      # if it was the last instance of this integration, clear up the DOMAIN entry
+      if not hass.data[DOMAIN]:
+          del hass.data[DOMAIN]
 
-    return True
+      return True
+
+    return False
 
 
 # -------------------------------------------------------------------------------------
