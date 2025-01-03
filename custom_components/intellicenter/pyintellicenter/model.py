@@ -115,6 +115,11 @@ class PoolObject:
         """Return the list of attributes for this object."""
         return list(self._properties.keys())
 
+    @property
+    def properties(self) -> dict:
+        """Return the properties of the object."""
+        return self._properties
+
     def update(self, updates):
         """Update the object from a set of key/value pairs, return the changed attributes."""
 
