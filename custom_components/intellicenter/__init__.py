@@ -108,7 +108,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.info(f"connected to system: '{controller.systemInfo.propName}'")
             for object in controller.model:
                 _LOGGER.debug(f"   loaded {object}")
-            await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+            async def setup_platforms():
+                """Set up platforms."""
+                await asyncio.gather(
+                    hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+                )
+                # dispatcher.async_dispatcher_send(hass, self.CONNECTION_SIGNAL, True)
+            hass.async_create_task(setup_platforms())
 
         @callback
         def reconnected(self, controller):
