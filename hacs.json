@@ -1,6 +1,6 @@
 {
-    "name": "Pentair Intellicenter",
-    "domains": ["sensor","binary_sensor","light","switch","water_heater"],
+    "name": "Pentair IntelliCenter",
+    "domains": ["sensor","binary_sensor","light","switch","water_heater","number"],
     "iot_class": ["Local Push"],
     "render_readme": "True"
   }
