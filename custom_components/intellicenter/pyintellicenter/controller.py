@@ -162,7 +162,8 @@ class BaseController:
         """Stop all activities from this controller and disconnect."""
         if self._transport:
             for request in self._requests.values():
-                request.cancel()
+                if request is not None:
+                    request.cancel()
             self._transport.close()
             self._transport = None
             self._protocol = None
