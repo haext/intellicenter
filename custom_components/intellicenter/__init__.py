@@ -4,6 +4,7 @@ import logging
 from typing import Any, Optional
 
 from homeassistant.components.binary_sensor import DOMAIN as BINARY_SENSOR_DOMAIN
+from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
@@ -66,6 +67,7 @@ PLATFORMS = [
     BINARY_SENSOR_DOMAIN,
     WATER_HEATER_DOMAIN,
     NUMBER_DOMAIN,
+    COVER_DOMAIN,
 ]
 
 # -------------------------------------------------------------------------------------
