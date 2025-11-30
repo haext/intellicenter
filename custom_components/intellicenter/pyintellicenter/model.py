@@ -79,7 +79,7 @@ class PoolObject:
     @property
     def supportColorEffects(self) -> bool:
         """Return True is object is a light that support color effects."""
-        return self.isALight and self.subtype in ["INTELLI", "MAGIC2"]
+        return self.isALight and self.subtype in ["INTELLI", "MAGIC2", "GLOW"]
 
     @property
     def isALightShow(self) -> bool:

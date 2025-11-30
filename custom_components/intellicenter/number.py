@@ -45,23 +45,17 @@ async def async_setup_entry(
             and obj.subtype == "ICHLOR"
             and PRIM_ATTR in obj.attributes
         ):
-            bodies = controller.model.getByType(BODY_TYPE)
             intellichlor_bodies = obj[BODY_ATTR].split(" ")
-
-            body: PoolObject
-            for body in bodies:
-                intellichlor_index = intellichlor_bodies.index(body.objnam)
-                attribute_key = None
-                if intellichlor_index == 0:
-                    attribute_key = PRIM_ATTR
-                elif intellichlor_index == 1:
-                    attribute_key = SEC_ATTR
-                if attribute_key is not None:
+            
+            # Only create number entities for bodies that are actually configured
+            for index, body_id in enumerate(intellichlor_bodies):
+                body = controller.model[body_id]
+                if body is not None:
+                    attribute_key = PRIM_ATTR if index == 0 else SEC_ATTR
                     numbers.append(
                         PoolNumber(
                             entry,
                             controller,
-                            # body,
                             obj,
                             unit_of_measurement=PERCENTAGE,
                             attribute_key=attribute_key,
