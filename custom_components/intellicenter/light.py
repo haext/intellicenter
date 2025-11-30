@@ -4,12 +4,7 @@ from functools import reduce
 import logging
 from typing import Any
 
-from homeassistant.components.light import (
-    ATTR_EFFECT,
-    ColorMode,
-    LightEntity,
-    LightEntityFeature,
-)
+from homeassistant.components.light import ATTR_EFFECT, LightEntity, LightEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
@@ -61,7 +56,7 @@ async def async_setup_entry(
                     LIGHTS_EFFECTS if obj.supportColorEffects else None,
                 )
             )
-        elif obj.isALightShow:
+        elif object.isALightShow:
             supportColorEffects = reduce(
                 lambda x, y: x and y,
                 (controller.model[obj[CIRCUIT_ATTR]].supportColorEffects for obj in controller.model.getChildren(obj)),
@@ -105,6 +100,11 @@ class PoolLight(PoolEntity, LightEntity):
 
         if self._lightEffects:
             self._attr_supported_features |= LightEntityFeature.EFFECT
+
+    @property
+    def supported_features(self) -> int:
+        """Return supported features."""
+        return self._attr_supported_features
 
     @property
     def effect_list(self) -> list:

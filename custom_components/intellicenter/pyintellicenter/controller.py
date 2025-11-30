@@ -116,7 +116,6 @@ class BaseController:
         self._protocol = None
 
         self._diconnectedCallback = None
-        self._systemInfo = None
 
         self._requests = {}
 
@@ -162,9 +161,10 @@ class BaseController:
     def stop(self):
         """Stop all activities from this controller and disconnect."""
         if self._transport:
-            for request in self._requests.values():
-                if request is not None:
-                    request.cancel()
+            for future in self._requests.values():
+                if future:
+                    future.cancel()
+            self._requests = {}
             self._transport.close()
             self._transport = None
             self._protocol = None
