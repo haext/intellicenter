@@ -4,7 +4,7 @@ from functools import reduce
 import logging
 from typing import Any
 
-from homeassistant.components.light import ATTR_EFFECT, LightEntity, LightEntityFeature
+from homeassistant.components.light import ATTR_EFFECT, ColorMode, LightEntity, LightEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
